@@ -35,6 +35,8 @@ public class AwesomeLinkFilter implements Filter {
 		System.err.println("state.FILE_PATTERN: " + AwesomeConsoleConfig.getInstance().FILE_PATTERN);
 		createFileCache(new File(project.getBasePath()));
 		srcRoots = getSourceRoots();
+		System.err.println("state.FILE_PATTERN: " + AwesomeConsoleConfig.getInstance().FILE_PATTERN);
+		AwesomeConsoleConfig.getInstance().FILE_PATTERN = "foo";
 		createFileCache(new File(project.getBasePath()));
 	}
 
