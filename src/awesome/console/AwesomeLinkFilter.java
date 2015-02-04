@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AwesomeLinkFilter implements Filter {
+//	Pattern FILE_PATTERN = null;
 	private static final Pattern FILE_PATTERN = Pattern.compile("([a-zA-Z][a-zA-Z0-9/\\-_\\.]+\\.[a-z]+)(:(\\d+))?(:(\\d+))?");
 	private static final Pattern URL_PATTERN = Pattern.compile("((((ftp)|(file)|(https?)):/)?/[-_.!~*\\\\'()a-zA-Z0-9;\\\\/?:\\\\@&=+\\\\$,%#]+)");
 	private final Map<String, List<File>> fileCache = new HashMap<>();
@@ -26,8 +27,8 @@ public class AwesomeLinkFilter implements Filter {
 
 	public AwesomeLinkFilter(final Project project) {
 		this.project = project;
+//		FILE_PATTERN = Pattern.compile(AwesomeConsoleConfig.getInstance().FILE_PATTERN);
 		System.err.println("state.FILE_PATTERN: " + AwesomeConsoleConfig.getInstance().FILE_PATTERN);
-		AwesomeConsoleConfig.getInstance().FILE_PATTERN = "foo";
 		createFileCache(new File(project.getBasePath()));
 	}
 
