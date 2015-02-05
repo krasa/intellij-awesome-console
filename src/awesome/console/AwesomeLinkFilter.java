@@ -34,6 +34,7 @@ public class AwesomeLinkFilter implements Filter {
 		System.err.println("state.FILE_PATTERN: " + AwesomeConsoleConfig.getInstance().FILE_PATTERN);
 		createFileCache(new File(project.getBasePath()));
 		srcRoots = getSourceRoots();
+		createFileCache(new File(project.getBasePath()));
 	}
 
 	@Override
@@ -116,7 +117,8 @@ public class AwesomeLinkFilter implements Filter {
 
 	public List<File> getResultItemsFileFromBasename(final String match) {
 		final ArrayList<File> matches = new ArrayList<>();
-		final int index = match.lastIndexOf('.');
+		final char packageSeparator = '.';
+		final int index = match.lastIndexOf(packageSeparator);
 		if (-1 >= index) {
 			return matches;
 		}
@@ -127,8 +129,8 @@ public class AwesomeLinkFilter implements Filter {
 		if (!fileBaseCache.containsKey(basename)) {
 			return matches;
 		}
-		final String path = match.substring(0, index).replace('.', File.separatorChar);
-		for (File file : fileBaseCache.get(basename)) {
+		final String path = match.substring(0, index).replace(packageSeparator, File.separatorChar);
+		for (final File file : fileBaseCache.get(basename)) {
 			final String parent = file.getParent();
 			if (null == parent) {
 				continue;
@@ -150,16 +152,16 @@ public class AwesomeLinkFilter implements Filter {
 	}
 
 	private List<String> getSourceRoots() {
-		final VirtualFile[] contentSourceRoots = ProjectRootManager.getInstance(this.project).getContentSourceRoots();
+		final VirtualFile[] contentSourceRoots = ProjectRootManager.getInstance(project).getContentSourceRoots();
 		final List<String> roots = new ArrayList<>();
-		for (VirtualFile root : contentSourceRoots) {
+		for (final VirtualFile root : contentSourceRoots) {
 			roots.add(root.getPath());
 		}
 		return roots;
 	}
 
-	private boolean matchSource(String parent, String path) {
-		for (String srcRoot : this.srcRoots) {
+	private boolean matchSource(final String parent, final String path) {
+		for (final String srcRoot : srcRoots) {
 			if ((srcRoot + File.separatorChar + path).equals(parent)) {
 				return true;
 			}
