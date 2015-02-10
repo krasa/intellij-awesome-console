@@ -1,10 +1,17 @@
 package awesome.console;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import a.j.se;
+import com.intellij.openapi.editor.HighlighterColors;
+import com.intellij.openapi.editor.colors.CodeInsightColors;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.util.ui.UIUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,12 +34,20 @@ public class AwesomeClassLinkFilter implements Filter {
 	private PsiShortNamesCache instance;
 	private AwesomeConsoleConfig config;
 	protected GlobalSearchScope globalSearchScope;
+	protected TextAttributes attributes;
 
 	public AwesomeClassLinkFilter(final Project project) {
 		this.project = project;
 		this.instance = PsiShortNamesCache.getInstance(project);
 		config = AwesomeConsoleConfig.getInstance();
 		globalSearchScope = GlobalSearchScope.allScope(project);
+		// attributes =
+		// EditorColorsManager.getInstance().getGlobalScheme().getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES);
+		Color libTextColor = UIUtil.getInactiveTextColor();
+		attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(HighlighterColors.TEXT);
+		attributes = attributes.clone();
+		attributes.setForegroundColor(libTextColor);
+		// attributes.setEffectColor(libTextColor);
 	}
 
 	@Override
@@ -74,7 +89,7 @@ public class AwesomeClassLinkFilter implements Filter {
 			// todo must implement my own which can navigate properly
 			final HyperlinkInfo linkInfo = HyperlinkInfoFactory.getInstance().createMultipleFilesHyperlinkInfo(
 					virtualFiles, -1, project);
-			results.add(new Result(startPoint + matcher.start(), startPoint + matcher.end(), linkInfo));
+			results.add(new Result(startPoint + matcher.start(), startPoint + matcher.end(), linkInfo, attributes));
 		}
 		return results;
 	}
