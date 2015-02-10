@@ -10,6 +10,7 @@ public class AwesomeLinkFilterProvider implements ConsoleFilterProvider {
 	@Override
 	public Filter[] getDefaultFilters(@NotNull Project project) {
 		Filter filter = new AwesomeLinkFilter(project);
-		return new Filter[]{filter};
+		AwesomeClassLinkFilter linkFilter = new AwesomeClassLinkFilter(project);
+		return new Filter[]{filter, linkFilter};
 	}
 }
