@@ -42,12 +42,7 @@
 	<depends>com.intellij.modules.lang</depends>
     <extensions defaultExtensionNs="com.intellij">
         <consoleFilterProvider implementation="awesome.console.AwesomeLinkFilterProvider"/>
+        <applicationConfigurable instance="awesome.console.config.AwesomeConsoleConfig"/>
+        <applicationService serviceImplementation="awesome.console.config.AwesomeConsoleConfig"/>
     </extensions>
-
-    <application-components>
-    <!-- Add your application components here -->
-        <component>
-            <implementation-class>awesome.console.config.AwesomeConsoleConfig</implementation-class>
-        </component>
-    </application-components>
 </idea-plugin>

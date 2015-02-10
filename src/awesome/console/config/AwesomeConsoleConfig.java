@@ -1,13 +1,11 @@
 package awesome.console.config;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.*;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.util.xmlb.annotations.Transient;
 import org.jetbrains.annotations.Nls;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -18,7 +16,7 @@ import javax.swing.*;
 				@Storage(id = "IDE config dir", file = StoragePathMacros.APP_CONFIG + "/awesomeconsoleconfig.xml")
 		}
 )
-public class AwesomeConsoleConfig implements PersistentStateComponent<AwesomeConsoleConfig>, Configurable, ApplicationComponent {
+public class AwesomeConsoleConfig implements PersistentStateComponent<AwesomeConsoleConfig>, Configurable {
 
 	public boolean LIMIT_LINE_LENGTH = true;
 	public int LINE_MAX_LENGTH = 1024;
@@ -43,7 +41,7 @@ public class AwesomeConsoleConfig implements PersistentStateComponent<AwesomeCon
 	 * Helpers
 	 */
 	public static AwesomeConsoleConfig getInstance() {
-		return ApplicationManager.getApplication().getComponent(AwesomeConsoleConfig.class);
+		return ServiceManager.getService(AwesomeConsoleConfig.class);
 	}
 
 	private void initFromConfig() {
@@ -126,22 +124,5 @@ public class AwesomeConsoleConfig implements PersistentStateComponent<AwesomeCon
 	@Override
 	public void disposeUIResources() {
 		form = null;
-	}
-
-	/**
-	 * ApplicationComponent
-	 */
-	@Override
-	public void initComponent() {
-	}
-
-	@Override
-	public void disposeComponent() {
-	}
-
-	@NotNull
-	@Override
-	public String getComponentName() {
-		return "Awesome Console";
 	}
 }
