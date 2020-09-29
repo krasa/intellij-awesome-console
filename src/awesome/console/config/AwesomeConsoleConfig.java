@@ -1,15 +1,15 @@
 package awesome.console.config;
 
+import awesome.console.AwesomeLinkFilterProvider;
+import com.intellij.execution.filters.ConsoleFilterProvider;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.*;
-import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import com.intellij.util.xmlb.annotations.Transient;
-import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
 
 @State(
 		name = "Awesome Console Config",
@@ -17,14 +17,24 @@ import javax.swing.*;
 				@Storage(value = "awesomeconsole.xml", roamingType = RoamingType.DISABLED)
 		}
 )
-public class AwesomeConsoleConfig implements PersistentStateComponent<AwesomeConsoleConfig>, Configurable {
+public class AwesomeConsoleConfig implements PersistentStateComponent<AwesomeConsoleConfig> {
 	public boolean SPLIT_ON_LIMIT = false;
 	public boolean LIMIT_LINE_LENGTH = true;
 	public int LINE_MAX_LENGTH = 1024;
 	public boolean SEARCH_URLS = true;
 
-	@Transient
-	private AwesomeConsoleConfigForm form;
+	public AwesomeConsoleConfig() {
+		ApplicationManager.getApplication().getMessageBus().connect().subscribe(ProjectManager.TOPIC, new ProjectManagerListener() {
+			@Override
+			public void projectClosed(@NotNull Project project) {
+				ConsoleFilterProvider.FILTER_PROVIDERS.getExtensionList().forEach(consoleFilterProvider -> {
+					if (consoleFilterProvider instanceof AwesomeLinkFilterProvider) {
+						((AwesomeLinkFilterProvider) consoleFilterProvider).projectClosed(project);
+					}
+				});
+			}
+		});
+	}
 
 	/**
 	 * PersistentStateComponent
@@ -44,99 +54,7 @@ public class AwesomeConsoleConfig implements PersistentStateComponent<AwesomeCon
 	 * Helpers
 	 */
 	public static AwesomeConsoleConfig getInstance() {
-		return ApplicationManager.getApplication().getComponent(AwesomeConsoleConfig.class);
+		return ServiceManager.getService(AwesomeConsoleConfig.class);
 	}
 
-	private void initFromConfig() {
-		form.limitLineMatchingByCheckBox.setSelected(LIMIT_LINE_LENGTH);
-
-		form.matchLinesLongerThanCheckBox.setEnabled(LIMIT_LINE_LENGTH);
-		form.matchLinesLongerThanCheckBox.setSelected(SPLIT_ON_LIMIT);
-
-		form.searchForURLsFileCheckBox.setSelected(SEARCH_URLS);
-
-		form.maxLengthTextField.setText(String.valueOf(LINE_MAX_LENGTH));
-		form.maxLengthTextField.setEnabled(LIMIT_LINE_LENGTH);
-		form.maxLengthTextField.setEditable(LIMIT_LINE_LENGTH);
-	}
-
-	private void showErrorDialog() {
-		JOptionPane.showMessageDialog(form.mainpanel, "Error: Please enter a positive number.", "Invalid value", JOptionPane.ERROR_MESSAGE);
-	}
-
-	/**
-	 * Configurable
-	 */
-	@Nls
-	@Override
-	public String getDisplayName() {
-		return "Awesome Console";
-	}
-
-	@Nullable
-	@Override
-	public String getHelpTopic() {
-		return "help topic";
-	}
-
-	@Nullable
-	@Override
-	public JComponent createComponent() {
-		form = new AwesomeConsoleConfigForm();
-		initFromConfig();
-		return form.mainpanel;
-	}
-
-	@Override
-	public boolean isModified() {
-		final String text = form.maxLengthTextField.getText().trim();
-		if (text.length() < 1) {
-			return true;
-		}
-		final int len;
-		try {
-			len = Integer.parseInt(text);
-		} catch (final NumberFormatException nfe) {
-			return true;
-		}
-		return form.limitLineMatchingByCheckBox.isSelected() != LIMIT_LINE_LENGTH
-				|| len != LINE_MAX_LENGTH
-				|| form.matchLinesLongerThanCheckBox.isSelected() != SPLIT_ON_LIMIT
-				|| form.searchForURLsFileCheckBox.isSelected() != SEARCH_URLS;
-	}
-
-	@Override
-	public void apply() {
-		final String text = form.maxLengthTextField.getText().trim();
-		if (text.length() < 1) {
-			showErrorDialog();
-			return;
-		}
-		final int maxLength;
-		try {
-			maxLength = Integer.parseInt(text);
-		} catch (final NumberFormatException nfe) {
-			showErrorDialog();
-			return;
-		}
-		if (maxLength < 1) {
-			showErrorDialog();
-			return;
-		}
-		LIMIT_LINE_LENGTH = form.limitLineMatchingByCheckBox.isSelected();
-		LINE_MAX_LENGTH = maxLength;
-		SPLIT_ON_LIMIT = form.matchLinesLongerThanCheckBox.isSelected();
-		SEARCH_URLS = form.searchForURLsFileCheckBox.isSelected();
-		loadState(this);
-	}
-
-	@Override
-	public void reset() {
-		initFromConfig();
-	}
-
-	@Override
-	public void disposeUIResources() {
-		form = null;
-	}
 }

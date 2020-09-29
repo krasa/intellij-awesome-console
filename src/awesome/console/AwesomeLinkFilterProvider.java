@@ -26,4 +26,9 @@ public class AwesomeLinkFilterProvider extends ConsoleDependentFilterProvider {
 				new Filter[]{new AwesomeLinkFilter(project)}
 		);
 	}
+
+	public void projectClosed(@NotNull Project project) {
+		cache.remove(project);
+	}
+
 }
